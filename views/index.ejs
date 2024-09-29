@@ -1,0 +1,86 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Transfer</title>
+  <!-- <link href="/style.css" rel="stylesheet"> Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-500" >
+  <div class="bg-gray-500 flex  flex-col items-center ">
+  <!-- Navbar -->
+  <nav class=" w-full p-4 text-white">
+    <ul class="flex justify-center space-x-4">
+      <li><a href="/" class="hover:text-black">Home</a></li>
+      <li><a href="/about" class="hover:text-black">About Us</a></li>
+      <li><a href="/project" class="hover:text-black">Project</a></li>
+    </ul>
+  </nav>
+
+  <!-- File Transfer Section -->
+  <div class="mt-10">
+    <h1 class="text-4xl font-bold mb-6 text-center">File Transfer</h1>
+
+    <div class="flex flex-col items-center">
+      <input type="file" id="fileInput" class="mb-4 block w-full text-sm text-gray-900 border-none rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700">
+      <button id="sendFileBtn" class="bg-blue-600 hover:bg-black transition ease-in-out text-white py-2 px-4 rounded-lg">
+        Send File
+      </button>
+    </div>
+    
+    <!-- Received Files -->
+    <h2 class="text-2xl font-bold mt-10 text-center">Received Files</h2>
+    <div id="receivedFiles" class="mt-4 text-center"></div>
+  </div>
+</div>
+
+<footer class="w-full bg-gray-500 text-white mt-10 p-4">
+  <p class="text-center">2024 PPP | All Rights Reserved</p>
+</footer>
+
+  
+
+  <!-- Socket.IO Script -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+
+    // Send file to the server
+    document.getElementById('sendFileBtn').addEventListener('click', function () {
+      var fileInput = document.getElementById('fileInput');
+      var file = fileInput.files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          socket.emit('send_file', {
+            filename: file.name,
+            filedata: e.target.result
+          });
+          alert('File sent: ' + file.name);
+        };
+        reader.readAsDataURL(file); // Convert file to base64
+      }
+    });
+
+    // Receive file from the server
+    socket.on('receive_file', function (data) {
+      var receivedFiles = document.getElementById('receivedFiles');
+      var link = document.createElement('a');
+      link.href = data.filedata;
+      link.download = data.filename;
+      link.innerText = 'Download ' + data.filename;
+      receivedFiles.appendChild(link);
+      receivedFiles.appendChild(document.createElement('br'));
+    });
+  </script>
+  
+
+
+</body>
+
+</html>
